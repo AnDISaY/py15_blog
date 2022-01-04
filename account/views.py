@@ -1,3 +1,26 @@
-from django.shortcuts import render
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.views import APIView
 
-# Create your views here.
+
+class RegistrationView(APIView):
+    pass
+
+
+class ActivationView(APIView):
+    pass
+
+
+class LoginView(ObtainAuthToken):
+    pass
+
+
+class LogoutView(APIView):
+    pass
+
+
+# class ForgotPasswordView(APIView):
+#     pass
+#
+#
+# class ForgotPasswordCompleteView(APIView):
+#    pass

@@ -31,7 +31,7 @@ class User(AbstractBaseUser):
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name']
-    objects = UserManager
+    objects = UserManager()
 
     def __str__(self):
         return self.phone
