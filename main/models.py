@@ -20,7 +20,7 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=80)
-    description = models.TextField
+    description = models.TextField()
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')

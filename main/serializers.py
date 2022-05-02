@@ -16,37 +16,53 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     user = serializers.CharField(source='user.name')
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'user', 'created_at']
+        fields = ['id', 'title', 'user', 'created_at', 'image']
+
+    def get_image(self, post):
+        first_image = post.pics.first()
+        if first_image and first_image.image:
+            return first_image.image.url
+        return ''
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ['image']
 
 
 class PostSerializer(serializers.ModelSerializer):
-    images = serializers.ListField(child=serializers.ImageField(allow_empty_file=False
-                                                                ))
+    images = serializers.ListField(child=serializers.ImageField(allow_empty_file=False), write_only=True, required=False)
 
     class Meta:
         model = Post
-        fields = '__all__'
+        exclude = ['user']
 
     def create(self, validated_data):
-        images = validated_data.pop('images')
+        user = self.context.get('request').user
+        validated_data['user'] = user
+        images = validated_data.pop('images', [])
         post = super().create(validated_data)
         for image in images:
             PostImage.objects.create(post=post, image=image)
         return post
 
     def update(self, instance, validated_data):
-        images = validated_data.pop('images')
+        images = validated_data.pop('images', [])
         if images:
             for image in images:
                 PostImage.objects.create(post=instance, image=image)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
-        representation = super().to_representation()
+        representation = super().to_representation(instance)
+        representation['images'] = PostImageSerializer(instance.pics.all(), many=True).data
+        representation['comments'] = CommentSerializer(instance.comments.all(), many=True).data
         return representation
 
 
@@ -55,4 +71,9 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        exclude = ['user']
+
+    def create(self, validated_data):
+        user = self.context.get('request').user
+        validated_data['user'] = user
+        return super().create(validated_data)

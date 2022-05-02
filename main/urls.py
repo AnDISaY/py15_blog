@@ -1,12 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import CategoriesListView, PostViewSet
+from .views import CategoriesListView, PostViewSet, CommentViewSet
 
 router = DefaultRouter()
 router.register('posts', PostViewSet)
+router.register('comments', CommentViewSet)
 
 urlpatterns = [
-    path('categories', CategoriesListView.as_view()),
+    path('categories/', CategoriesListView.as_view()),
     path('', include(router.urls)),
 ]

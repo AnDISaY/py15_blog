@@ -45,5 +45,14 @@ class User(AbstractBaseUser):
     def create_activation_code(self):
         from django.utils.crypto import get_random_string
         code = get_random_string(6, '0123456789')
+        if User.objects.filter(activation_code=code).exists():
+            self.create_activation_code()
         self.activation_code = code
         self.save()
+
+    def send_activation_sms(self):
+        from django.conf import settings
+        from twilio.rest import Client
+        message = f'Ваш код подтверждения: {self.activation_code}'
+        client = Client(settings.TWILIO_SID, settings.TWILIO_AUTH_TOKEN)
+        client.messages.create(body=message, from_=settings.TWILIO_NUMBER, to=self.phone)
